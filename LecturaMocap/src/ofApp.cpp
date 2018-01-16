@@ -110,7 +110,7 @@ void ofApp::analizaCSV(){
 	if (!archivo.exists()) ofLogError("The file " + nombreArchivo + " is missing");
 	else ofLogNotice("Archivo Encontrado: " + nombreArchivo + "\n Procesando...");
 	/// Crea archivo a escribir con datos procesados
-	editado.open(nombreArchivo + "_b_editado.csv", ofFile::WriteOnly);
+	editado.open(nombreArchivo + "_c_editado.csv", ofFile::WriteOnly);
 	/// 
 	ofBuffer buffer(archivo);
 	for (ofBuffer::Line it = buffer.getLines().begin(), end = buffer.getLines().end(); it != end; ++it) {
