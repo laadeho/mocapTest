@@ -1,28 +1,4 @@
 #include "ofApp.h"
-#include <winsock2.h>
-#include <vector>
-#include "ofUtils.h"
-
-vector <string> linea;
-vector <ofPoint> coords;
-vector <vector<ofPoint> > coordsFrames;
-
-vector<string> words2;
-vector<string> words5;
-vector<string> words6;
-vector<string> wordsFila;
-
-bool borra = true;
-float x = 0, y = 0, z = 0;
-
-string nombreArchivo;
-
-bool analiza = true; // analiza == false = dibuja, analiza = analiza csv
-int lineaAnalisis = 7;
-int saltoLinea = 1;
-int escala = 150;
-
-ofEasyCam cam;
 
 //--------------------------------------------------------------
 void ofApp::setup() {
@@ -30,6 +6,9 @@ void ofApp::setup() {
 	ofSetBackgroundAuto(false);
 	ofBackground(0);
 
+	/// GUI
+	setupGUI();
+	ofxDatGui* gui = new ofxDatGui(100, 100);
 	//nombreArchivo = "Fermin_manos_edited";
 	nombreArchivo = "beto_mocap_fULL";
 	ofFile archivo(nombreArchivo + ".csv");
@@ -85,6 +64,92 @@ void ofApp::setup() {
 		//cargaCoords();
 	}
 	//coordenadas();
+}
+/*--- GUI --------------------------------------*/
+void ofApp::setupGUI() {	////////////// OFXDATGUI
+	std::string pathGui;
+	pathGui = "../";
+	ofxDatGui::setAssetPath(pathGui);
+	gui = new ofxDatGui(ofGetWidth() - 300, 50);
+	//gui = new ofxDatGui(ofxDatGuiAnchor::TOP_RIGHT);
+	gui->setTheme(new ofxDatGuiThemeArteJoyas());
+	//gui->setTheme(new ofxDatGuiThemeSmoke());
+	gui->addLabel(": : : C  O  N  F  I  G  U  R  A  D  O  R : : :");
+	gui->addBreak()->setHeight(10.0f);
+	// =============================================
+	ofxDatGuiFolder* guiDatos = gui->addFolder(":: D A T O S ::", ofColor::blue);
+	/*guiDatos->addTextInput("N O M B R E", " -- TU NOMBRE -- ");
+	guiDatos->addTextInput("C O R R E O", " -- CORREO ELECTRONICO -- ");
+	gui->addBreak()->setHeight(10.0f);
+	// =============================================
+	gui->addLabel(": : : SELECTOR  A N I L L O  //  D I J E : : :");
+	gui->addToggle("A N I L L O")->setChecked(true);
+	gui->addBreak()->setHeight(10.0f);
+	// =============================================
+	gui->addDropdown("S E L E C C I O N A R   T A L L A", tallaArray)->setLabelColor(ofColor::fromHex(0xeeeeee));
+	gui->addDropdown("D I A M E T R O   D I J E", dijeDiamArray)->setLabelColor(ofColor::fromHex(0xeeeeee));
+	gui->addBreak()->setHeight(10.0f);
+	// =============================================
+	ofxDatGuiFolder* guiAnillo = gui->addFolder(":: P E R S O N A L I Z A ::", ofColor::cyan);
+	guiAnillo->addSlider("V O L U M E N", 1, 50, 10)->setPrecision(1);
+	guiAnillo->addSlider("V E L O C I D A D", 1, 4, velAudio)->setPrecision(0);
+	// ANILLO
+	guiAnillo->addSlider("A M P L I T U D", 10, subRad / 3, indiceMedio)->setPrecision(0);
+	guiAnillo->addSlider("E s p e s o r", 15, 30, espesor)->setPrecision(0);
+	guiAnillo->addSlider("G r o s o r", 30, 70, grosor)->setPrecision(0);
+	// DIJE
+	guiAnillo->addSlider("E s p e s o r ", 15, 25, espesorD)->setPrecision(0);
+	guiAnillo->addSlider("G r o s o r ", 15, 40, grosorD)->setPrecision(0); /// DIJE
+																			// GENERALES
+	guiAnillo->addSlider("B o l e a d o", 5, 15, redondea)->setPrecision(0);
+	guiAnillo->addSlider("O N D A", 0, 1, segundaOnda)->setPrecision(2);
+	guiAnillo->addSlider("S A L T A R", 1, 15, 1)->setPrecision(0);
+	gui->addBreak()->setHeight(10.0f);
+	// =============================================
+	ofxDatGuiFolder* guiVis = gui->addFolder(":: V I S U A L I Z A C I O N ::", ofColor::green);
+	guiVis->addToggle("S U P E R F I C I E")->setChecked(true);
+	guiVis->addToggle("M A T E R I A L")->setChecked(false);
+	guiVis->addToggle("W I R E F R A M E")->setChecked(true);
+	gui->addBreak()->setHeight(10.0f);
+	// =============================================
+	ofxDatGuiFolder* guiCam = gui->addFolder(":: C A M A R A ::", ofColor::white);
+	guiCam->add2dPad("Camara")->setBounds(ofRectangle(ofPoint(0, 0), 100, 100), false);
+	guiCam->addToggle("R O T A R")->setChecked(false);
+	gui->addBreak()->setHeight(10.0f);
+
+	// =============================================
+	/// DEBUG //////////////////////////////////////////////////////
+	if (debug) {
+		ofxDatGuiFolder* guiDebug = gui->addFolder(":: D E B U G ::", ofColor::hotPink);
+		guiDebug->addToggle("DEBUG")->setChecked(false);
+		guiDebug->addSlider("AudioMinLevel", 0, 0.1f, volMin)->setPrecision(3);
+		gui->addBreak()->setHeight(10.0f);
+		// =============================================
+	}
+	ofxDatGuiFolder* guiCompra = gui->addFolder(":: C O M P R A R ::", ofColor::crimson);
+	guiCompra->addButton("C O M P R A R    A H O R A");
+	gui->addBreak()->setHeight(10.0f);
+	// =============================================
+	gui->addFooter();
+	gui->getFooter()->setLabelWhenExpanded(" - M I N I M I Z A R - ");
+	gui->getFooter()->setLabelWhenCollapsed(" - E X P A N D I R :: M E N U - ");
+	gui->collapse();
+	///////// EVENTOS ///////////////////////////////////
+	gui->onDropdownEvent(this, &ofApp::onDropdownEvent);
+	gui->onSliderEvent(this, &ofApp::onSliderEvent);
+	gui->onToggleEvent(this, &ofApp::onToggleEvent);
+	gui->onTextInputEvent(this, &ofApp::onTextInputEvent);
+	gui->on2dPadEvent(this, &ofApp::on2dPadEvent);
+	gui->onButtonEvent(this, &ofApp::onButtonEvent);
+	/// GUI A MOSTRAR AL INICIO /////////////////////////
+	gui->getDropdown("S E L E C C I O N A R   T A L L A")->setVisible(true);
+	gui->getDropdown("D I A M E T R O   D I J E")->setVisible(false);
+	gui->getSlider("G R O S O R")->setVisible(true);
+	gui->getSlider("G R O S O R ")->setVisible(false);
+	gui->getSlider("E s p e s o r")->setVisible(true);
+	gui->getSlider("E s p e s o r ")->setVisible(false);
+	gui->getSlider("A M P L I T U D")->setVisible(true);
+	*/
 }
 
 //--------------------------------------------------------------
